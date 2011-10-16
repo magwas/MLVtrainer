@@ -1,0 +1,15 @@
+This is a very simple command line vocabulary trainer, as I like it.
+
+You give one command line argument: the filename of the MLVT dictionary database.
+
+You will get a list of categories.
+enter a comma separated list of categories you want to train.
+
+Words will be asked, and you should answer the translation.
+
+If you fail, you can read the correct answer, and you should enter it.
+
+A word is deemed to be learned when you were able to enter it correctly at first try four times.
+
+I have found this trainer very helpful. I have been written its first version in basic on an enterprise-128 (with a casette player as "mass" storage) 23 years ago. It is the 3rd and shortest version.
+

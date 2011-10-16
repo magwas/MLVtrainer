@@ -1,0 +1,45 @@
+#!/usr/bin/python
+import sqlite3
+import sys
+import random
+
+random.seed()
+
+def getans():
+    ans=sys.stdin.readline().strip()
+    #print (ans,"s")
+    #print (ans.decode('utf-8'),"u")
+    return ans.decode('utf-8')
+
+
+c=sqlite3.connect(sys.argv[1])
+for (i,name) in c.execute("select id,category from categories").fetchall():
+    print i,":",name
+print "?"
+catlist=getans()
+rr = c.execute("select lang1translation,lang2translation from vocabulary where categoryid in (%s)"%catlist)
+
+wlist = []
+for l1,l2 in rr.fetchall():
+    wlist.append([l1,l2,0])
+
+c.close()
+
+while True:
+    i = random.randint(0,len(wlist)-1)
+    o = wlist[i]
+    print "\n",o[0]
+    ans=getans()
+    if o[1] == ans:
+        o[2] += 1
+        print "correct!", o[2]
+    else:
+        while ans != o[1]:
+            print o[1]
+            ans=getans()
+    if o[2] > 3:
+        wlist.remove(o)
+        print "learned:",o[0],o[1]
+    if len(wlist) == 0:
+        break
+

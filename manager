@@ -1,0 +1,17 @@
+#!/usr/bin/python
+
+import sqlite3 as db
+import sys
+import os
+from lib.guardedcursor import GuardedCursor
+from tools.dbinstall import DBInstall
+from lib.manager import Manager
+
+
+if __name__ == "__main__":
+	if len(sys.argv) != 2:
+		print "usage: manager <filename>"
+		sys.exit(1)
+
+	Manager(sys.argv[1]).mainloop()
+

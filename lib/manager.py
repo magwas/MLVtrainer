@@ -3,10 +3,27 @@
 import sqlite3 as db
 import sys
 import os
+import random
+import subprocess
 from lib.guardedcursor import GuardedCursor
 from tools.dbinstall import DBInstall
 
 
+class UI:
+	@staticmethod
+	def clear():
+		os.system([ 'clear', 'cls' ][ os.name == 'nt' ] )
+
+	@staticmethod
+	def say(ans,language,encoding='latin-1'):
+		p=subprocess.Popen(['festival' ,'--language', language, '--tts'],stdin=subprocess.PIPE).stdin
+		p.write(ans.encode(encoding))
+		p.close()
+
+	@staticmethod
+	def getans():
+		ans=sys.stdin.readline().strip()
+		return ans.decode('utf-8')
 
 class Manager:
 
@@ -19,7 +36,6 @@ class Manager:
 			except db.OperationalError:
 				DBInstall().run(dbpath)
 				self.con.commit()
-
 	def mainloop(self):
 		while True:
 			sys.stdout.write(">")
@@ -31,7 +47,46 @@ class Manager:
 			else:
 				self.cmd_help()
 
-	def cmd_help(self):
+	def cmd_train(self,cmd):
+		"""
+		Train a category
+		"""
+		with GuardedCursor(self.con) as cur:
+			self.cmd_lscat(None)
+			print "which categories to learn? (comma separated)"
+			catlist=UI.getans()
+			rr = cur.execute("select lang1translation as l1,lang2translation as l2 from vocabulary where categoryid in (%s)"%catlist)
+			wlist = []
+			for r in cur.generator():
+				wlist.append([r.l1,r.l2,0])
+		UI.clear()
+		while True:
+			i = random.randint(0,len(wlist)-1)
+			o = wlist[i]
+			print "\n",o[0]
+			UI.say(o[0],language='english')
+			ans=UI.getans()
+			if o[1] == ans:
+				o[2] += 1
+			else:
+				while ans != o[1]:
+					print o[1]
+					UI.say(o[1],language="spanish")
+					ans=UI.getans()
+			print "correct!", o[2]
+			UI.say(o[1],language="spanish")
+			if o[2] > 3:
+				wlist.remove(o)
+				print "learned:",o[0],o[1]
+			if len(wlist) == 0:
+				break
+			ans=UI.getans()
+			if ans == 'quit':
+				return
+			UI.clear()
+		
+
+	def cmd_help(self,dummy=None):
 		"gives help"
 		for i in dir(self):
 			if i[:4] == 'cmd_':
